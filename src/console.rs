@@ -2,6 +2,7 @@ use std::io::{stdout, Stdout, Write};
 
 use termion::{
     cursor::Goto,
+    event::Key,
     raw::{IntoRawMode, RawTerminal},
     terminal_size,
 };
@@ -96,6 +97,77 @@ impl Console {
         )
         .unwrap();
         self.stdout.flush().unwrap();
+    }
+
+    pub fn process_arrow_keys(&mut self, key: Key) {
+        match key {
+            Key::Left => {
+                if self.cursor_position.0 > 9 {
+                    self.cursor_position = (self.cursor_position.0 - 1, self.cursor_position.1);
+                    write!(
+                        self.stdout,
+                        "{}",
+                        Goto(self.cursor_position.0, self.cursor_position.1)
+                    )
+                    .unwrap();
+                    self.stdout.flush().unwrap();
+                } else if self.cursor_position.1 > 1 {
+                    self.cursor_position = (9, self.cursor_position.1 - 1);
+                    write!(
+                        self.stdout,
+                        "{}",
+                        Goto(self.cursor_position.0, self.cursor_position.1)
+                    )
+                    .unwrap();
+                    self.stdout.flush().unwrap();
+                }
+            }
+            Key::Right => {
+                if self.cursor_position.0 < self.width {
+                    self.cursor_position = (self.cursor_position.0 + 1, self.cursor_position.1);
+                    write!(
+                        self.stdout,
+                        "{}",
+                        Goto(self.cursor_position.0, self.cursor_position.1)
+                    )
+                    .unwrap();
+                } else {
+                    self.cursor_position = (9, self.cursor_position.1 + 1);
+                    write!(
+                        self.stdout,
+                        "{}",
+                        Goto(self.cursor_position.0, self.cursor_position.1)
+                    )
+                    .unwrap();
+                }
+                self.stdout.flush().unwrap();
+            }
+            Key::Up => {
+                if self.cursor_position.1 > 1 {
+                    self.cursor_position = (self.cursor_position.0, self.cursor_position.1 - 1);
+                    write!(
+                        self.stdout,
+                        "{}",
+                        Goto(self.cursor_position.0, self.cursor_position.1)
+                    )
+                    .unwrap();
+                    self.stdout.flush().unwrap();
+                }
+            }
+            Key::Down => {
+                if self.cursor_position.1 <= self.max_line_num {
+                    self.cursor_position = (self.cursor_position.0, self.cursor_position.1 + 1);
+                    write!(
+                        self.stdout,
+                        "{}",
+                        Goto(self.cursor_position.0, self.cursor_position.1)
+                    )
+                    .unwrap();
+                    self.stdout.flush().unwrap();
+                }
+            }
+            _ => {}
+        }
     }
 }
 
