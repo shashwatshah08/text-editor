@@ -56,6 +56,12 @@ impl Console {
             self.set_cursor(9, self.cursor_position.1 + 1);
         }
     }
+
+    pub fn process_character(&mut self, c: char) {
+        self.set_cursor(self.cursor_position.0 + 1, self.cursor_position.1);
+        print!("{}", c);
+        self.stdout.flush().unwrap();
+    }
 }
 
 pub fn format_u16(n: u16) -> String {

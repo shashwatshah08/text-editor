@@ -7,7 +7,6 @@ use crate::console::{format_u16, Console};
 #[derive(Default)]
 pub struct Editor {
     pub console: Console,
-    pub max_line_num: u16,
 }
 
 impl Editor {
@@ -20,7 +19,6 @@ impl Editor {
         self.console.set_cursor(9, 1);
 
         for key in stdin().keys() {
-            let cursor_position = self.console.cursor_position;
             let key = key.unwrap();
             match key {
                 Key::Ctrl('q') => {
@@ -34,10 +32,7 @@ impl Editor {
                     self.console.process_enter();
                 }
                 Key::Char(c) => {
-                    self.console
-                        .set_cursor(cursor_position.0 + 1, cursor_position.1);
-                    print!("{}", c);
-                    stdout().flush().unwrap();
+                    self.console.process_character(c);
                 }
                 _ => {
                     print!("{:?}\r", key);
