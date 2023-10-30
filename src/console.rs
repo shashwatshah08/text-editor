@@ -31,4 +31,16 @@ impl Console {
         write!(self.stdout, "{}", termion::cursor::Goto(x, y)).unwrap();
         self.stdout.flush().unwrap();
     }
+
+    pub fn process_backspace(&mut self) {
+        if self.cursor_position.0 == 9 {
+            if self.cursor_position.1 > 1 {
+                self.set_cursor(9, self.cursor_position.1 - 1);
+            }
+        } else {
+            print!("\x08 \x08");
+            self.stdout.flush().unwrap();
+            self.cursor_position = (self.cursor_position.0 - 1, self.cursor_position.1);
+        }
+    }
 }

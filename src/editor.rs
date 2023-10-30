@@ -28,15 +28,7 @@ impl Editor {
                     break;
                 }
                 Key::Backspace => {
-                    if cursor_position.0 == 9 {
-                        if cursor_position.1 > 1 {
-                            self.console.set_cursor(9, cursor_position.1 - 1);
-                        }
-                    } else {
-                        print!("\x08 \x08");
-                        stdout().flush().unwrap();
-                        self.console.cursor_position = (cursor_position.0 - 1, cursor_position.1);
-                    }
+                    self.console.process_backspace();
                 }
                 Key::Char('\n') => {
                     if self.console.cursor_position.1 > self.max_line_num {
