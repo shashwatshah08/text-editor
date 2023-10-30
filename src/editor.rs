@@ -2,7 +2,7 @@ use std::io::{stdin, stdout, Write};
 
 use termion::{event::Key, input::TermRead};
 
-use crate::console::Console;
+use crate::console::{format_u16, Console};
 
 #[derive(Default)]
 pub struct Editor {
@@ -31,14 +31,7 @@ impl Editor {
                     self.console.process_backspace();
                 }
                 Key::Char('\n') => {
-                    if self.console.cursor_position.1 > self.max_line_num {
-                        self.max_line_num = self.console.cursor_position.1;
-                        print!("\r\n{} | ", format_u16(self.console.cursor_position.1 + 1));
-                        stdout().flush().unwrap();
-                        self.console.set_cursor(9, cursor_position.1 + 1);
-                    } else {
-                        self.console.set_cursor(9, cursor_position.1 + 1);
-                    }
+                    self.console.process_enter();
                 }
                 Key::Char(c) => {
                     self.console
@@ -53,10 +46,4 @@ impl Editor {
             }
         }
     }
-}
-
-fn format_u16(n: u16) -> String {
-    let s = n.to_string();
-    let padding = " ".repeat(5 - s.len());
-    format!("{}{}", padding, s)
 }

@@ -10,6 +10,7 @@ pub struct Console {
     pub width: u16,
     pub stdout: RawTerminal<Stdout>,
     pub cursor_position: (u16, u16),
+    pub max_line_num: u16,
 }
 
 impl Default for Console {
@@ -21,6 +22,7 @@ impl Default for Console {
             width,
             stdout,
             cursor_position: (1, 1),
+            max_line_num: 0,
         }
     }
 }
@@ -43,4 +45,21 @@ impl Console {
             self.cursor_position = (self.cursor_position.0 - 1, self.cursor_position.1);
         }
     }
+
+    pub fn process_enter(&mut self) {
+        if self.cursor_position.1 > self.max_line_num {
+            self.max_line_num = self.cursor_position.1;
+            print!("\r\n{} | ", format_u16(self.cursor_position.1 + 1));
+            self.stdout.flush().unwrap();
+            self.set_cursor(9, self.cursor_position.1 + 1);
+        } else {
+            self.set_cursor(9, self.cursor_position.1 + 1);
+        }
+    }
+}
+
+pub fn format_u16(n: u16) -> String {
+    let s = n.to_string();
+    let padding = " ".repeat(5 - s.len());
+    format!("{}{}", padding, s)
 }
