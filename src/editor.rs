@@ -11,8 +11,7 @@ pub struct Editor {
 
 impl Editor {
     pub fn run(&mut self) {
-        self.draw_rows();
-        self.console.set_cursor(1, 1);
+        self.console.render();
 
         for key in stdin().keys() {
             let key = key.unwrap();
@@ -22,28 +21,19 @@ impl Editor {
                     break;
                 }
                 Key::Backspace => {
-                    print!("\x08 \x08");
-                    stdout().flush().unwrap();
+                    self.console.process_backspace();
                 }
                 Key::Char('\n') => {
-                    print!("\r\n");
-                    stdout().flush().unwrap();
+                    self.console.process_enter();
                 }
                 Key::Char(c) => {
-                    print!("{}", c);
-                    stdout().flush().unwrap();
+                    self.console.process_character(c);
                 }
                 _ => {
                     print!("{:?}\r", key);
                     stdout().flush().unwrap();
                 }
             }
-        }
-    }
-
-    fn draw_rows(&self) {
-        for _ in 0..self.console.height - 1 {
-            println!("~\r");
         }
     }
 }
