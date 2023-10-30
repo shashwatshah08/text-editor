@@ -12,10 +12,15 @@ pub struct Editor {
 
 impl Editor {
     pub fn run(&mut self) {
+        print!("{}", termion::clear::All);
+        stdout().flush().unwrap();
+        self.console.set_cursor(1, 1);
         print!("\r{} | ", format_u16(self.row_number));
         stdout().flush().unwrap();
+        self.console.set_cursor(9, 1);
 
         for key in stdin().keys() {
+            let cursor_position = self.console.cursor_position;
             let key = key.unwrap();
             match key {
                 Key::Ctrl('q') => {
@@ -23,15 +28,23 @@ impl Editor {
                     break;
                 }
                 Key::Backspace => {
-                    print!("\x08 \x08");
-                    stdout().flush().unwrap();
+                    if cursor_position.0 == 9 {
+                        self.console.set_cursor(9, cursor_position.1 - 1);
+                    } else {
+                        print!("\x08 \x08");
+                        stdout().flush().unwrap();
+                        self.console.cursor_position = (cursor_position.0 - 1, cursor_position.1);
+                    }
                 }
                 Key::Char('\n') => {
                     self.row_number += 1;
                     print!("\r\n{} | ", format_u16(self.row_number));
                     stdout().flush().unwrap();
+                    self.console.set_cursor(9, cursor_position.1 + 1);
                 }
                 Key::Char(c) => {
+                    self.console
+                        .set_cursor(cursor_position.0 + 1, cursor_position.1);
                     print!("{}", c);
                     stdout().flush().unwrap();
                 }
