@@ -7,7 +7,7 @@ use crate::console::Console;
 #[derive(Default)]
 pub struct Editor {
     pub console: Console,
-    pub row_number: u16,
+    pub max_line_num: u16,
 }
 
 impl Editor {
@@ -15,7 +15,7 @@ impl Editor {
         print!("{}", termion::clear::All);
         stdout().flush().unwrap();
         self.console.set_cursor(1, 1);
-        print!("\r{} | ", format_u16(self.row_number));
+        print!("\r{} | ", format_u16(self.console.cursor_position.1));
         stdout().flush().unwrap();
         self.console.set_cursor(9, 1);
 
@@ -29,7 +29,9 @@ impl Editor {
                 }
                 Key::Backspace => {
                     if cursor_position.0 == 9 {
-                        self.console.set_cursor(9, cursor_position.1 - 1);
+                        if cursor_position.1 > 1 {
+                            self.console.set_cursor(9, cursor_position.1 - 1);
+                        }
                     } else {
                         print!("\x08 \x08");
                         stdout().flush().unwrap();
@@ -37,10 +39,14 @@ impl Editor {
                     }
                 }
                 Key::Char('\n') => {
-                    self.row_number += 1;
-                    print!("\r\n{} | ", format_u16(self.row_number));
-                    stdout().flush().unwrap();
-                    self.console.set_cursor(9, cursor_position.1 + 1);
+                    if self.console.cursor_position.1 > self.max_line_num {
+                        self.max_line_num = self.console.cursor_position.1;
+                        print!("\r\n{} | ", format_u16(self.console.cursor_position.1 + 1));
+                        stdout().flush().unwrap();
+                        self.console.set_cursor(9, cursor_position.1 + 1);
+                    } else {
+                        self.console.set_cursor(9, cursor_position.1 + 1);
+                    }
                 }
                 Key::Char(c) => {
                     self.console
