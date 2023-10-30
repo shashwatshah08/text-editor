@@ -1,0 +1,9 @@
+{
+    "cSpell.words": [
+        "crossterm",
+        "termion"
+    ],
+    "rust-analyzer.linkedProjects": [
+        "./Cargo.toml"
+    ]
+}
