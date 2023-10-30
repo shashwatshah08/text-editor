@@ -1,13 +1,18 @@
 use std::io::{stdin, stdout, Write};
 
-use termion::{event::Key, input::TermRead, raw::IntoRawMode};
+use termion::{event::Key, input::TermRead};
+
+use crate::console::Console;
 
 #[derive(Default)]
-pub struct Editor {}
+pub struct Editor {
+    pub console: Console,
+}
 
 impl Editor {
-    pub fn run(&self) {
-        let _stdout = stdout().into_raw_mode().unwrap();
+    pub fn run(&mut self) {
+        self.draw_rows();
+        self.console.set_cursor(1, 1);
 
         for key in stdin().keys() {
             let key = key.unwrap();
@@ -33,6 +38,12 @@ impl Editor {
                     stdout().flush().unwrap();
                 }
             }
+        }
+    }
+
+    fn draw_rows(&self) {
+        for _ in 0..self.console.height - 1 {
+            println!("~\r");
         }
     }
 }
