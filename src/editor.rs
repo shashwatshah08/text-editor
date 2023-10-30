@@ -2,7 +2,7 @@ use std::io::{stdin, stdout, Write};
 
 use termion::{event::Key, input::TermRead};
 
-use crate::console::{format_u16, Console};
+use crate::console::Console;
 
 #[derive(Default)]
 pub struct Editor {
@@ -11,12 +11,7 @@ pub struct Editor {
 
 impl Editor {
     pub fn run(&mut self) {
-        print!("{}", termion::clear::All);
-        stdout().flush().unwrap();
-        self.console.set_cursor(1, 1);
-        print!("\r{} | ", format_u16(self.console.cursor_position.1));
-        stdout().flush().unwrap();
-        self.console.set_cursor(9, 1);
+        self.console.render();
 
         for key in stdin().keys() {
             let key = key.unwrap();

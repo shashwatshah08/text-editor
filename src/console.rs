@@ -1,6 +1,7 @@
 use std::io::{stdout, Stdout, Write};
 
 use termion::{
+    cursor::Goto,
     raw::{IntoRawMode, RawTerminal},
     terminal_size,
 };
@@ -28,21 +29,42 @@ impl Default for Console {
 }
 
 impl Console {
-    pub fn set_cursor(&mut self, x: u16, y: u16) {
-        self.cursor_position = (x, y);
-        write!(self.stdout, "{}", termion::cursor::Goto(x, y)).unwrap();
+    pub fn render(&mut self) {
+        print!("{}", termion::clear::All);
+        self.cursor_position = (1, 1);
+        write!(
+            self.stdout,
+            "{}",
+            Goto(self.cursor_position.0, self.cursor_position.1)
+        )
+        .unwrap();
+        print!("\r{} | ", format_u16(self.cursor_position.1));
+        self.cursor_position = (9, 1);
+        write!(
+            self.stdout,
+            "{}",
+            Goto(self.cursor_position.0, self.cursor_position.1)
+        )
+        .unwrap();
         self.stdout.flush().unwrap();
     }
 
     pub fn process_backspace(&mut self) {
         if self.cursor_position.0 == 9 {
             if self.cursor_position.1 > 1 {
-                self.set_cursor(9, self.cursor_position.1 - 1);
+                self.cursor_position = (9, self.cursor_position.1 - 1);
+                write!(
+                    self.stdout,
+                    "{}",
+                    Goto(self.cursor_position.0, self.cursor_position.1)
+                )
+                .unwrap();
+                self.stdout.flush().unwrap();
             }
         } else {
+            self.cursor_position = (self.cursor_position.0 - 1, self.cursor_position.1);
             print!("\x08 \x08");
             self.stdout.flush().unwrap();
-            self.cursor_position = (self.cursor_position.0 - 1, self.cursor_position.1);
         }
     }
 
@@ -50,16 +72,29 @@ impl Console {
         if self.cursor_position.1 > self.max_line_num {
             self.max_line_num = self.cursor_position.1;
             print!("\r\n{} | ", format_u16(self.cursor_position.1 + 1));
-            self.stdout.flush().unwrap();
-            self.set_cursor(9, self.cursor_position.1 + 1);
+            self.cursor_position = (9, self.cursor_position.1 + 1);
+            write!(
+                self.stdout,
+                "{}",
+                Goto(self.cursor_position.0, self.cursor_position.1)
+            )
+            .unwrap();
         } else {
-            self.set_cursor(9, self.cursor_position.1 + 1);
+            self.cursor_position = (9, self.cursor_position.1 + 1);
+            write!(self.stdout, "{}", Goto(9, self.cursor_position.1)).unwrap();
         }
+        self.stdout.flush().unwrap();
     }
 
     pub fn process_character(&mut self, c: char) {
-        self.set_cursor(self.cursor_position.0 + 1, self.cursor_position.1);
         print!("{}", c);
+        self.cursor_position = (self.cursor_position.0 + 1, self.cursor_position.1);
+        write!(
+            self.stdout,
+            "{}",
+            Goto(self.cursor_position.0, self.cursor_position.1)
+        )
+        .unwrap();
         self.stdout.flush().unwrap();
     }
 }
