@@ -7,12 +7,13 @@ use crate::console::Console;
 #[derive(Default)]
 pub struct Editor {
     pub console: Console,
+    pub row_number: u16,
 }
 
 impl Editor {
     pub fn run(&mut self) {
-        self.draw_rows();
-        self.console.set_cursor(1, 1);
+        print!("\r{} | ", format_u16(self.row_number));
+        stdout().flush().unwrap();
 
         for key in stdin().keys() {
             let key = key.unwrap();
@@ -26,7 +27,8 @@ impl Editor {
                     stdout().flush().unwrap();
                 }
                 Key::Char('\n') => {
-                    print!("\r\n");
+                    self.row_number += 1;
+                    print!("\r\n{} | ", format_u16(self.row_number));
                     stdout().flush().unwrap();
                 }
                 Key::Char(c) => {
@@ -40,10 +42,10 @@ impl Editor {
             }
         }
     }
+}
 
-    fn draw_rows(&self) {
-        for _ in 0..self.console.height - 1 {
-            println!("~\r");
-        }
-    }
+fn format_u16(n: u16) -> String {
+    let s = n.to_string();
+    let padding = " ".repeat(5 - s.len());
+    format!("{}{}", padding, s)
 }
